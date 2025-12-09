@@ -1,0 +1,29 @@
+{
+  "name": "lightsail-manager",
+  "version": "1.0.0",
+  "description": "Web app to manage AWS Lightsail MERN projects via SSH",
+  "main": "backend/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd backend && nodemon server.js",
+    "client:dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "build-frontend": "cd frontend && npm install && npm run build && rm -rf backend/public && cp -r frontend/dist backend/public",
+    "start": "cd backend && node server.js",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": [
+    "lightsail",
+    "ssh",
+    "pm2",
+    "manager",
+    "deployment"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2"
+  }
+}
