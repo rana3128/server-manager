@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ProjectManager.css';
 
-function ProjectManager({ onClose, onProjectAdded }) {
+function ProjectManager({ onClose, onProjectAdded, editProject = null }) {
   const [mode, setMode] = useState('existing'); // 'existing' or 'clone'
   const [formData, setFormData] = useState({
     name: '',
@@ -13,6 +13,22 @@ function ProjectManager({ onClose, onProjectAdded }) {
     deploySteps: [],
     gitUrl: ''
   });
+
+  // Load project data when editing
+  useEffect(() => {
+    if (editProject) {
+      setFormData({
+        name: editProject.name || '',
+        path: editProject.path || '',
+        pm2Name: editProject.pm2Name || '',
+        description: editProject.description || '',
+        type: editProject.type || 'mern',
+        buildSteps: editProject.buildSteps || [],
+        deploySteps: editProject.deploySteps || [],
+        gitUrl: ''
+      });
+    }
+  }, [editProject]);
   const [buildStep, setBuildStep] = useState('');
   const [deployStep, setDeployStep] = useState('');
   const [loading, setLoading] = useState(false);
@@ -74,7 +90,16 @@ function ProjectManager({ onClose, onProjectAdded }) {
         pm2Name: formData.pm2Name || formData.name
       };
 
-      if (mode === 'clone') {
+      if (editProject) {
+        // Update existing project
+        response = await fetch(`/api/projects/${editProject.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } else if (mode === 'clone') {
         // Clone new project
         if (!formData.gitUrl) {
           setError('Git URL is required for cloning');
@@ -113,7 +138,7 @@ function ProjectManager({ onClose, onProjectAdded }) {
           onClose();
         }
       } else {
-        setError(data.error || 'Failed to create project');
+        setError(data.error || (editProject ? 'Failed to update project' : 'Failed to create project'));
       }
     } catch (err) {
       setError(err.message);
@@ -126,7 +151,7 @@ function ProjectManager({ onClose, onProjectAdded }) {
     <div className="project-manager-overlay" onClick={onClose}>
       <div className="project-manager" onClick={(e) => e.stopPropagation()}>
         <div className="manager-header">
-          <h2>➕ Add New Project</h2>
+          <h2>{editProject ? '✏️ Edit Project' : '➕ Add New Project'}</h2>
           <button onClick={onClose} className="close-btn">✕</button>
         </div>
 
@@ -139,9 +164,10 @@ function ProjectManager({ onClose, onProjectAdded }) {
             </div>
           )}
 
-          <div className="form-section">
-            <h3>Project Mode</h3>
-            <div className="mode-selector">
+          {!editProject && (
+            <div className="form-section">
+              <h3>Project Mode</h3>
+              <div className="mode-selector">
               <label className={`mode-option ${mode === 'existing' ? 'active' : ''}`}>
                 <input
                   type="radio"
@@ -161,12 +187,13 @@ function ProjectManager({ onClose, onProjectAdded }) {
                 <span>🔗 Clone New Project</span>
               </label>
             </div>
-          </div>
+            </div>
+          )}
 
           <div className="form-section">
             <h3>Basic Information</h3>
             
-            {mode === 'clone' && (
+            {mode === 'clone' && !editProject && (
               <div className="form-group">
                 <label>Git Repository URL *</label>
                 <input
@@ -314,7 +341,7 @@ function ProjectManager({ onClose, onProjectAdded }) {
               Cancel
             </button>
             <button type="submit" disabled={loading} className="btn-submit">
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? (editProject ? 'Updating...' : 'Creating...') : (editProject ? 'Update Project' : 'Create Project')}
             </button>
           </div>
         </form>

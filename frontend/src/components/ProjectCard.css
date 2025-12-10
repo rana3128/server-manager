@@ -121,7 +121,7 @@
 
 .card-actions {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -183,6 +183,15 @@
 
 .btn-info:hover:not(:disabled) {
   background: #138496;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #5a6268;
 }
 
 .btn-danger {

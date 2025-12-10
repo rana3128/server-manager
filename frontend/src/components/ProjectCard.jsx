@@ -3,7 +3,7 @@ import { restartProcess, stopProcess, startProcess, buildProject, deployProject,
 import DeleteConfirmModal from './DeleteConfirmModal';
 import './ProjectCard.css';
 
-function ProjectCard({ project, process, onRefresh, onViewLogs }) {
+function ProjectCard({ project, process, onRefresh, onViewLogs, onEdit }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -45,24 +45,7 @@ function ProjectCard({ project, process, onRefresh, onViewLogs }) {
     return '✗ Offline';
   };
 
-  const getMemoryUsage = () => {
-    if (!process?.monit?.memory) return 'N/A';
-    const mb = (process.monit.memory / 1024 / 1024).toFixed(0);
-    return `${mb} MB`;
-  };
 
-  const getCpuUsage = () => {
-    if (!process?.monit?.cpu) return 'N/A';
-    return `${process.monit.cpu}%`;
-  };
-
-  const getUptime = () => {
-    if (!process?.pm2_env?.pm_uptime) return 'N/A';
-    const uptimeMs = Date.now() - process.pm2_env.pm_uptime;
-    const hours = Math.floor(uptimeMs / (1000 * 60 * 60));
-    const minutes = Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m`;
-  };
 
   const handleDelete = async () => {
     setLoading(true);
@@ -97,26 +80,6 @@ function ProjectCard({ project, process, onRefresh, onViewLogs }) {
           <span className="info-label">Path:</span>
           <span className="info-text">{project.path}</span>
         </div>
-        {process && (
-          <>
-            <div className="info-row">
-              <span className="info-label">Memory:</span>
-              <span className="info-text">{getMemoryUsage()}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">CPU:</span>
-              <span className="info-text">{getCpuUsage()}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Uptime:</span>
-              <span className="info-text">{getUptime()}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Restarts:</span>
-              <span className="info-text">{process.pm2_env?.restart_time || 0}</span>
-            </div>
-          </>
-        )}
       </div>
 
       {message && (
@@ -156,6 +119,14 @@ function ProjectCard({ project, process, onRefresh, onViewLogs }) {
           disabled={!process}
         >
           📄 Logs
+        </button>
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => onEdit(project)}
+          disabled={loading}
+        >
+          ✏️ Edit
         </button>
 
         <button

@@ -8,6 +8,7 @@ function Dashboard({ projects, pm2Processes, onRefresh, loading }) {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [showAddProject, setShowAddProject] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
 
   const getProcessForProject = (projectName) => {
     return pm2Processes.find(p => p.name === projectName);
@@ -21,6 +22,14 @@ function Dashboard({ projects, pm2Processes, onRefresh, loading }) {
   const handleCloseLogs = () => {
     setShowLogs(false);
     setSelectedProject(null);
+  };
+
+  const handleEdit = (project) => {
+    setEditingProject(project);
+  };
+
+  const handleCloseEdit = () => {
+    setEditingProject(null);
   };
 
   return (
@@ -53,6 +62,7 @@ function Dashboard({ projects, pm2Processes, onRefresh, loading }) {
               process={getProcessForProject(project.pm2Name)}
               onRefresh={onRefresh}
               onViewLogs={handleViewLogs}
+              onEdit={handleEdit}
             />
           ))}
         </div>
@@ -69,6 +79,14 @@ function Dashboard({ projects, pm2Processes, onRefresh, loading }) {
         <ProjectManager
           onClose={() => setShowAddProject(false)}
           onProjectAdded={onRefresh}
+        />
+      )}
+
+      {editingProject && (
+        <ProjectManager
+          onClose={handleCloseEdit}
+          onProjectAdded={onRefresh}
+          editProject={editingProject}
         />
       )}
     </div>
